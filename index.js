@@ -18,27 +18,23 @@ const io = new Server(server, {
 		methods: ['GET', 'POST'],
 	},
 });
-
 const PORT = process.env.PORT || 3500;
 
 connectDB();
-app.use(credentials)
+app.use(credentials);
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-
 app.use('/register', require('./routes/register'));
 app.use('/auth', require('./routes/auth'));
 app.use('/refresh', require('./routes/refresh'));
-app.use('/logout', require('./routes/logout'));
-app.use('/allUserChats', require('./routes/allUserChats'));
-app.use('/createChat', require('./routes/createChat'));
-app.use('/currentUserChat', require('./routes/currentUserChat'));
-app.use('/deleteChatById', require('./routes/deleteChatById'));
-
-app.use(verifyJWT);
+app.use('/logout',  require('./routes/logout'));
+app.use('/allUserChats', verifyJWT, require('./routes/allUserChats'));
+app.use('/createChat', verifyJWT, require('./routes/createChat'));
+app.use('/currentUserChat', verifyJWT, require('./routes/currentUserChat'));
+app.use('/deleteChatById',verifyJWT, require('./routes/deleteChatById'));
 
 io.on('connection', (socket) => {
 	socket.on('joinRoom', async (room) => {
@@ -48,12 +44,17 @@ io.on('connection', (socket) => {
 		io.to(room).emit('receiveMessage', msg);
 	});
   
-	socket.on('sendMessage', async (messages, chatName) => {
-		await Chat.sendMessageToChat(chatName, messages);
-		const msg = await Chat.getMessagesByChat(chatName);
-		io.to(chatName).emit('receiveMessage', msg);
+	socket.on('sendMessage', async (messages, room) => {
+		await Chat.sendMessageToChat(room, messages);
+		const msg = await Chat.getMessagesByChat(room);
+
+		io.to(room).emit('receiveMessage', msg);
 
 	});
+
+	socket.on("disconnectRoom", (room) => {
+		socket.leave(room);
+  });
 
 	socket.on('joinUser', async (email) => {
 		socket.join(email);
@@ -64,7 +65,11 @@ io.on('connection', (socket) => {
 	socket.on('createNewChat', async (consumer) => {
 		const chats = await Chat.searchChatsByEmail(consumer);
 		io.to(consumer).emit('receiveChats', chats);
-	})
+	});
+
+	socket.on("disconnectUser", (email) => {
+		socket.leave(email);
+  });
 });
 
 mongoose.connection.once('open', () => {

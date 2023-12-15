@@ -19,13 +19,13 @@ const handlerNewUser = async (req, res) => {
 		const refreshToken = jwt.sign(
 			{ "email": user.email },
 			process.env.REFRESH_TOKEN_SECRET,
-			{expiresIn: '1d'}
+			{expiresIn: '15m'}
 		);
-
-    res.cookie('jwt', accessToken, { httpOnly: true });
+		
+    res.cookie('refreshToken', refreshToken, {httpOnly: true, sameSite: 'None', maxAge: 15 * 60 * 1000, secure: true});
+		
 		res.status(201).json({
 			accessToken,
-			refreshToken,
 			user: {
 				email: user.email,
 				name: user.name,
