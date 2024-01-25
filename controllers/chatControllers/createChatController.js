@@ -41,7 +41,7 @@ const handleCreateChat = async (req, res) => {
 		console.log(e)
 	}
 
-	res.json({allUserChats: supplierChats});
+	res.json({userChats: supplierChats});
 
 }
 
