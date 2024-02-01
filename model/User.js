@@ -42,6 +42,11 @@ class User {
 
   static async findByEmail(email) {
     return UserModele.findOne({ email });
+	}
+	
+	static async findByID(id) {
+		const user = await UserModele.findById(id).exec();
+		return user;
   }
 }
 

@@ -6,7 +6,7 @@ const handleCurrentUserChat = async (req, res) => {
 	const chatName = query.chatName;
 	const chat = await Chat.searchChatByChatName(chatName);
 	if(!chat) res.redirect('/auth')
-	res.json(chat);
+	res.json({chat});
 }
 
 module.exports = { handleCurrentUserChat };

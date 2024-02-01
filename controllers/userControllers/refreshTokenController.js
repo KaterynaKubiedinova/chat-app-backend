@@ -7,7 +7,7 @@ const handleRefreshToken = async (req, res) => {
 	const refreshToken = req.cookies.refreshToken;
 
 	const blackListedRefreshToken = await initialiseRedis.then(data => data.get(refreshToken));
-	if (blackListedRefreshToken === 'true') return res.sendStatus(401);
+	if (blackListedRefreshToken === 'true') return res.sendStatus(402);
 
 	await initialiseRedis.then(data => data.set(refreshToken, 'true'));
 

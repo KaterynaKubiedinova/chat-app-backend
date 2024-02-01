@@ -6,7 +6,7 @@ const handleChatsByEmail = async (req, res) => {
 	const email = query.email;
 	const chats = await Chat.searchChatsByEmail(email);
 	
-	res.json(chats);
+	res.json({chats});
 }
 
 module.exports = { handleChatsByEmail };
